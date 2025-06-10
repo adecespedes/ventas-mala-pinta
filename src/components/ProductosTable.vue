@@ -1,9 +1,9 @@
 <template>
-  <q-card flat bordered>
+  <q-card flat bordered class="q-mt-md">
     <q-card-section class="row items-center">
       <div class="text-h6">Nomenclador de Productos</div>
       <div class="q-gutter-sm" style="flex-grow: 1"></div>
-      <q-btn color="primary" icon="add" label="Agregar Producto" @click="abrirForm()" />
+      <q-btn color="primary" icon="add" label="Adicionar" @click="abrirForm()" />
       <q-btn
         color="primary"
         icon="update"
@@ -14,29 +14,22 @@
       />
     </q-card-section>
 
-    <q-table
-      :rows="productos"
-      :columns="columns"
-      row-key="id"
-      flat
-      bordered
-      dense
-      :loading="loading"
-      class="q-mt-md"
-    >
-      <template v-slot:body-cell-actions="props">
-        <q-td align="right">
-          <q-btn dense flat icon="edit" color="primary" @click="abrirForm(props.row)" />
-          <q-btn
-            dense
-            flat
-            icon="delete"
-            color="negative"
-            @click="confirmarEliminar(props.row.id)"
-          />
-        </q-td>
-      </template>
-    </q-table>
+    <q-card-section
+      ><q-table
+        :rows="productos"
+        :columns="columns"
+        row-key="id"
+        :loading="loading"
+        class="q-mt-md"
+      >
+        <template v-slot:body-cell-actions="props">
+          <q-td align="right">
+            <q-btn flat icon="edit" color="primary" @click="abrirForm(props.row)" />
+            <q-btn flat icon="delete" color="negative" @click="confirmarEliminar(props.row.id)" />
+          </q-td>
+        </template>
+      </q-table>
+    </q-card-section>
 
     <q-dialog v-model="dialogOpen" persistent>
       <q-card style="min-width: 350px">
@@ -77,6 +70,9 @@
 <script setup>
 import { ref, onMounted } from 'vue'
 import { api } from 'boot/axios'
+import { useQuasar } from 'quasar'
+
+const $q = useQuasar()
 
 const productos = ref([])
 const loading = ref(false)
@@ -97,9 +93,9 @@ const form = ref({
 })
 
 const columns = [
-  { name: 'id', label: 'ID', field: 'id', align: 'left' },
-  { name: 'nombre', label: 'Nombre', field: 'nombre', align: 'left' },
-  { name: 'actions', label: 'Acciones', field: 'actions', align: 'right' },
+  { name: 'id', label: 'ID', field: 'id', align: 'center' },
+  { name: 'nombre', label: 'Nombre', field: 'nombre', align: 'center' },
+  { name: 'actions', label: '', field: 'actions', align: 'right' },
 ]
 
 const cargarProductos = async () => {
@@ -133,19 +129,20 @@ function cerrarForm() {
 
 async function guardarProducto() {
   if (!form.value.nombre.trim()) {
-    alert('El nombre es requerido')
     return
   }
   try {
     if (editando.value) {
       await api.patch(`/productos/${form.value.id}`, { nombre: form.value.nombre })
+      $q.notify({ type: 'positive', message: 'Producto editado correctamente' })
     } else {
       await api.post('/productos', { nombre: form.value.nombre })
+      $q.notify({ type: 'positive', message: 'Producto añadido correctamente' })
     }
     await cargarProductos()
     cerrarForm()
   } catch (error) {
-    alert('Error guardando el producto')
+    $q.notify({ type: 'negative', message: 'Error guardando el producto' })
     console.error(error)
   }
 }
@@ -154,6 +151,7 @@ async function eliminarProducto() {
   try {
     await api.delete(`/productos/${productoSeleccionado.value}`)
     dialogEliminar.value = false
+    $q.notify({ type: 'positive', message: 'Producto eliminado' })
     await cargarProductos()
   } catch (error) {
     alert('Error eliminando el producto')

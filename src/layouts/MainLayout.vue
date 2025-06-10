@@ -16,7 +16,7 @@
 
         <q-item clickable v-ripple to="/ventas">
           <q-item-section avatar><q-icon name="point_of_sale" /></q-item-section>
-          <q-item-section>Ventas</q-item-section>
+          <q-item-section>Ventas diarias</q-item-section>
         </q-item>
 
         <q-item clickable v-ripple to="/pacas">
