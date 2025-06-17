@@ -1,68 +1,110 @@
-<!-- src/components/VentaForm.vue -->
 <template>
   <q-dialog v-model="modelValue" persistent>
-    <q-card style="min-width: 400px; max-width: 600px">
-      <q-card-section>
-        <div class="text-h6">{{ editando ? 'Editar Venta' : 'Adicionar Venta' }}</div>
+    <q-card style="width: 600px; max-height: 90vh" class="column no-wrap">
+      <q-card-section
+        class="bg-primary text-white text-h6"
+        style="position: sticky; top: 0; z-index: 1"
+      >
+        {{ editando ? 'Editar Venta' : 'Adicionar venta' }}
       </q-card-section>
 
-      <q-card-section>
-        <q-form @submit.prevent="submitForm">
+      <q-card-section class="q-pa-md" style="overflow-y: auto; max-height: 65vh">
+        <q-form @submit.prevent="submitForm" class="q-gutter-md">
           <div
-            v-for="(item, index) in localForm.items"
+            v-for="(detalle, index) in detallesProducto"
             :key="index"
-            class="row q-gutter-md items-center"
+            class="row q-col-gutter-sm q-mb-sm items-center"
           >
-            <q-select
-              v-model="localForm.nombre"
-              :options="productos"
-              option-label="nombre"
-              option-value="nombre"
-              label="Producto"
-              emit-value
-              map-options
-              dense
-              required
-            />
-            <q-input
-              v-model.number="item.cantidadPiezas"
-              label="Piezas Vendidas"
-              type="number"
-              dense
-              class="col-3"
-              min="1"
-              required
-            />
-            <q-btn
-              icon="remove_circle"
-              color="negative"
-              flat
-              round
-              dense
-              @click="removerItem(index)"
-            />
+            <div class="col-7">
+              <q-select
+                v-model="detalle.productoId"
+                :options="productos"
+                option-label="nombre"
+                option-value="id"
+                label="Producto"
+                stack-label
+                emit-value
+                map-options
+                dense
+                outlined
+                required
+              />
+            </div>
+
+            <div class="col-4">
+              <q-input
+                v-model.number="detalle.cantidad"
+                label="Cantidad"
+                type="number"
+                min="1"
+                dense
+                outlined
+              />
+            </div>
+
+            <div class="col-1">
+              <q-btn icon="delete" color="negative" flat round @click="eliminarDetalle(index)" />
+            </div>
           </div>
 
-          <q-btn
-            label="Agregar Producto"
-            color="primary"
-            flat
-            @click="agregarItem"
-            class="q-mt-md"
-          />
+          <q-btn icon="add" label="Agregar producto" color="primary" flat @click="agregarDetalle" />
 
-          <q-input
-            v-model.number="localForm.total"
-            label="Total"
-            type="number"
-            required
-            class="q-mt-md"
-          />
+          <div class="text-subtitle2 text-primary">Detalles</div>
+          <div class="row q-col-gutter-md q-mt-xs">
+            <div class="col-4">
+              <q-input
+                v-model.number="localForm.totalPiezas"
+                label="Cantidad de piezas"
+                type="number"
+                dense
+                outlined
+                min="1"
+                required
+                class="q-ml-md"
+                :readonly="esSoloLecturaCantidad"
+              />
+            </div>
+            <div class="col-4">
+              <q-input
+                v-model.number="localForm.totalPrecio"
+                label="Monto total"
+                type="number"
+                dense
+                outlined
+                min="1"
+                required
+              />
+            </div>
+            <div class="col-4">
+              <q-input
+                label="Fecha de registro"
+                dense
+                outlined
+                :model-value="localForm.fecha"
+                readonly
+              >
+                <template #append>
+                  <q-icon name="event" class="cursor-pointer" @click="mostrarFecha = true" />
+                </template>
+                <q-popup-proxy
+                  v-model="mostrarFecha"
+                  transition-show="scale"
+                  transition-hide="scale"
+                >
+                  <q-date v-model="localForm.fecha" mask="YYYY-MM-DD" minimal today-btn />
+                </q-popup-proxy>
+              </q-input>
+            </div>
+          </div>
         </q-form>
       </q-card-section>
 
-      <q-card-actions align="right">
-        <q-btn flat label="Cancelar" @click="cancelar" />
+      <q-card-actions
+        align="right"
+        class="bg-grey-2"
+        style="position: sticky; bottom: 0; z-index: 1"
+      >
+        <q-btn flat label="Cancelar" color="primary" @click="cancelar" />
         <q-btn flat label="Guardar" color="primary" @click="submitForm" />
       </q-card-actions>
     </q-card>
@@ -71,7 +113,39 @@
 
 <script setup>
 import { api } from 'src/boot/axios'
-import { ref, watch, toRefs, onMounted } from 'vue'
+import { ref, watch, toRefs, onMounted, computed } from 'vue'
+
+const getFechaHoy = () => {
+  const hoy = new Date()
+  return `${hoy.getFullYear()}-${String(hoy.getMonth() + 1).padStart(2, '0')}-${String(
+    hoy.getDate()
+  ).padStart(2, '0')}`
+}
+
+const mostrarFecha = ref(false)
+const mostrarDetallesProducto = ref(true)
+const detallesProducto = ref([])
+
+const esSoloLecturaCantidad = computed(
+  () => mostrarDetallesProducto.value && detallesProducto.value.length > 0
+)
+
+watch(
+  detallesProducto,
+  (nuevosDetalles) => {
+    const total = nuevosDetalles.reduce((acc, detalle) => acc + (detalle.cantidad || 0), 0)
+    localForm.value.totalPiezas = total
+  },
+  { deep: true }
+)
+
+const agregarDetalle = () => {
+  detallesProducto.value.push({ productoId: null, cantidad: 1 })
+}
+
+const eliminarDetalle = (index) => {
+  detallesProducto.value.splice(index, 1)
+}
 
 const props = defineProps({
   modelValue: Boolean,
@@ -79,8 +153,11 @@ const props = defineProps({
     type: Object,
     default: () => ({
       id: null,
-      total: 0,
-      items: [{ nombre: '', cantidadPiezas: 1 }],
+      totalPiezas: 0,
+      totalPrecio: 0,
+      fecha: '',
+      productoId: null,
+      detalles: [],
     }),
   },
   editando: Boolean,
@@ -92,38 +169,32 @@ const { modelValue, formData, editando } = toRefs(props)
 
 const localForm = ref({ ...formData.value })
 
-// Para que items reactive correctamente
-if (!localForm.value.items || !Array.isArray(localForm.value.items)) {
-  localForm.value.items = []
-}
-
-watch(
-  () => formData.value,
-  (newVal) => {
-    localForm.value = { ...newVal }
-    if (!localForm.value.items || !Array.isArray(localForm.value.items)) {
-      localForm.value.items = []
+watch(modelValue, (val) => {
+  if (val) {
+    localForm.value = {
+      ...formData.value,
+      fecha: formData.value.fecha ?? getFechaHoy(),
     }
+
+    detallesProducto.value =
+      formData.value.detalles?.map((d) => ({
+        productoId: Number(d.producto.id), // <- fuerza a número
+        cantidad: d.cantidad,
+      })) || []
   }
-)
-
-const agregarItem = () => {
-  localForm.value.items.push({ nombre: '', cantidadPiezas: 1 })
-}
-
-const removerItem = (index) => {
-  localForm.value.items.splice(index, 1)
-}
+})
 
 const submitForm = () => {
-  // Validar que todos los items tengan nombre y cantidad válida
-  for (const item of localForm.value.items) {
-    if (!item.nombre || item.cantidadPiezas <= 0) {
-      alert('Complete todos los productos y cantidades correctamente')
-      return
-    }
+  const payload = {
+    ...localForm.value,
+    detalles: mostrarDetallesProducto.value ? detallesProducto.value : [],
   }
-  emit('save', { ...localForm.value })
+
+  if (payload.totalPiezas <= 0 || payload.totalPrecio <= 0 || !payload.fecha) {
+    return
+  }
+
+  emit('save', { payload })
 }
 
 const cancelar = () => {
@@ -131,6 +202,16 @@ const cancelar = () => {
 }
 
 const productos = ref([])
+const tipos = ref([])
+
+const cargarTipos = async () => {
+  try {
+    const res = await api.get('/tipos')
+    tipos.value = res.data
+  } catch (error) {
+    console.error(error)
+  }
+}
 
 const cargarProductos = async () => {
   try {
@@ -141,5 +222,9 @@ const cargarProductos = async () => {
   }
 }
 
-onMounted(cargarProductos)
+onMounted(() => {
+  cargarProductos()
+  cargarTipos()
+})
 </script>
+

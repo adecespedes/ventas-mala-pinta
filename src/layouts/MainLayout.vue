@@ -1,8 +1,15 @@
 <template>
   <q-layout view="hHh lpR fFf">
     <q-header elevated>
-      <q-toolbar>
+      <q-toolbar class="bg-primary glossy text-white">
         <q-btn flat dense round icon="menu" @click="drawer = !drawer" />
+        <q-avatar>
+          <img
+            src="~assets/mala_pinta.jpeg"
+            alt="Mala Pinta Logo"
+            style="width: 40px; height: 40px"
+          />
+        </q-avatar>
         <q-toolbar-title>Gestión de Ventas</q-toolbar-title>
       </q-toolbar>
     </q-header>

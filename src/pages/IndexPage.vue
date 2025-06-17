@@ -1,10 +1,6 @@
 <template>
   <q-page class="flex flex-center">
-    <img
-      alt="Quasar logo"
-      src="~assets/quasar-logo-vertical.svg"
-      style="width: 200px; height: 200px"
-    />
+    <img alt="Mala Pinta logo" src="~assets/mala_pinta.jpeg" style="width: 800px; height: 600px" />
   </q-page>
 </template>
 

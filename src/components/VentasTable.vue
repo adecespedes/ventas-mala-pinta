@@ -9,7 +9,7 @@
         color="primary"
         icon="update"
         label="Actualizar"
-        @click="cargarPacas()"
+        @click="cargarVentas()"
         :loading="loading"
         class="q-ml-sm"
       />
@@ -55,26 +55,11 @@
                 @click="props.expand = !props.expand"
               />
             </q-td>
-            <q-td key="nombre" :props="props">{{ props.row.nombre }}</q-td>
-            <q-td key="tipoId" :props="props">{{ props.row.tipo.nombre }}</q-td>
-            <q-td key="cantidad" :props="props">{{ props.row.cantidad }}</q-td>
-            <q-td key="precio" :props="props">{{ props.row.precio }}</q-td>
-            <q-td key="cambio" :props="props">{{ props.row.cambio }}</q-td>
-            <q-td key="precioMN" :props="props">
-              {{ `$${(props.row.precio * props.row.cambio).toFixed(2)}` }}
-            </q-td>
-            <q-td key="precioMin" :props="props">
-              {{
-                props.row.cantidad
-                  ? `$${Math.floor((props.row.precio * props.row.cambio) / props.row.cantidad)}`
-                  : '—'
-              }}
-            </q-td>
-            <!-- <q-td key="precioMN" :props="props">{{ props.row.precioMN }}</q-td>
-            <q-td key="precioMin" :props="props">{{ props.row.precioMin }}</q-td> -->
             <q-td key="fecha" :props="props">{{
               dayjs(props.row.fecha).format('DD-MM-YYYY')
             }}</q-td>
+            <q-td key="totalPiezas" :props="props">{{ props.row.totalPiezas }}</q-td>
+            <q-td key="totalPrecio" :props="props">${{ props.row.totalPrecio }}</q-td>
 
             <q-td key="acciones" :props="props" align="right">
               <q-btn flat icon="edit" color="primary" @click="abrirDialogo(props.row)">
@@ -94,7 +79,7 @@
               <q-list dense bordered class="q-pa-sm">
                 <q-item v-for="(detalle, idx) in props.row.detalles" :key="idx">
                   <q-item-section>{{ detalle.producto?.nombre }}</q-item-section>
-                  <q-item-section side>{{ detalle.total }}</q-item-section>
+                  <q-item-section side>{{ detalle.cantidad }}</q-item-section>
                 </q-item>
               </q-list>
             </q-td>
@@ -128,7 +113,7 @@
       </q-table>
     </q-card-section>
 
-    <paca-form v-model="dialogo" :formData="form" :editando="editando" @save="guardar" />
+    <venta-form v-model="dialogo" :formData="form" :editando="editando" @save="guardar" />
 
     <q-dialog v-model="dialogEliminar">
       <q-card>
@@ -148,10 +133,10 @@ import { ref, onMounted, computed } from 'vue'
 import { api } from 'boot/axios'
 import { useQuasar } from 'quasar'
 import dayjs from 'dayjs'
-import PacaForm from './PacaForm.vue'
+import VentaForm from './VentaForm.vue'
 
 const $q = useQuasar()
-const pacas = ref([])
+const ventas = ref([])
 const loading = ref(false)
 const dialogo = ref(false)
 
@@ -162,49 +147,24 @@ const dd = String(hoy.getDate()).padStart(2, '0')
 
 const form = ref({
   id: null,
-  nombre: '',
-  tipoId: '',
-  cantidad: 0,
-  precio: 0,
-  cambio: 0,
+  totalPiezas: 0,
+  totalPrecio: 0,
   fecha: `${yyyy}-${mm}-${dd}`,
   productoId: null,
 })
 
 const editando = ref(false)
 
-const pacaSeleccionada = ref(null)
+const ventaSeleccionada = ref(null)
 const dialogEliminar = ref(false)
 
 const confirmarEliminar = (id) => {
-  pacaSeleccionada.value = id
+  ventaSeleccionada.value = id
   dialogEliminar.value = true
 }
 
 const columns = [
   { name: 'expander', label: '', field: 'expander' },
-  { name: 'nombre', label: 'Nombre', field: 'nombre', align: 'center' },
-  {
-    name: 'tipoId',
-    label: 'Tipo de paca',
-    field: (row) => row.tipo?.nombre ?? '',
-    align: 'center',
-  },
-  { name: 'cantidad', label: 'Cantidad de piezas', field: 'cantidad', align: 'center' },
-  { name: 'precio', label: 'Precio (USD)', field: (row) => `$${row.precio}`, align: 'center' },
-  { name: 'cambio', label: 'Cambio del dia (ElToque)', field: 'cambio', align: 'center' },
-  {
-    name: 'precioMN',
-    label: 'Precio (MN)',
-    field: (row) => `$${row.precio * row.cambio}`,
-    align: 'center',
-  },
-  {
-    name: 'precioMin',
-    label: 'Precio costo pieza',
-    field: (row) => `$${Math.floor((row.precio * row.cambio) / row.cantidad)}`,
-    align: 'center',
-  },
   {
     name: 'fecha',
     label: 'Fecha de registro',
@@ -213,6 +173,10 @@ const columns = [
     sortable: true,
     format: (val) => dayjs(val).format('DD/MM/YYYY'),
   },
+
+  { name: 'totalPiezas', label: 'Cantidad de piezas', field: 'totalPiezas', align: 'center' },
+  { name: 'totalPrecio', label: 'Monto Total', field: 'totalPrecio', align: 'center' },
+
   { name: 'acciones', label: '', field: 'acciones', align: 'right' },
 ]
 
@@ -232,7 +196,7 @@ const actualizarTextoFiltro = () => {
 }
 
 const filtradas = computed(() => {
-  return pacas.value.filter((paca) => {
+  return ventas.value.filter((paca) => {
     const fecha = paca.fecha?.substring(0, 10)
 
     if (!filtroFecha.value) return true
@@ -247,30 +211,27 @@ const filtradas = computed(() => {
   })
 })
 
-const cargarPacas = async () => {
+const cargarVentas = async () => {
   loading.value = true
   try {
-    const res = await api.get('/pacas')
-    pacas.value = res.data
+    const res = await api.get('/ventas')
+    ventas.value = res.data
   } catch (err) {
-    console.error('Error cargando pacas', err)
+    console.error('Error cargando ventas', err)
   } finally {
     loading.value = false
   }
 }
 
-const abrirDialogo = (paca = null) => {
-  if (paca) {
-    form.value = { ...paca, detalles: paca.detalles ?? [] }
+const abrirDialogo = (venta = null) => {
+  if (venta) {
+    form.value = { ...venta, detalles: venta.detalles ?? [] }
     editando.value = true
   } else {
     form.value = {
       id: null,
-      nombre: '',
-      tipoId: '',
-      cantidad: 0,
-      precio: 0,
-      cambio: 0,
+      totalPiezas: 0,
+      totalPrecio: 0,
       fecha: `${yyyy}-${mm}-${dd}`,
       productoId: null,
       detalles: [],
@@ -283,14 +244,14 @@ const abrirDialogo = (paca = null) => {
 const guardar = async (datos) => {
   try {
     if (editando.value) {
-      await api.put(`/pacas/${datos.payload.id}`, datos.payload)
-      $q.notify({ type: 'positive', message: 'Paca actualizada' })
+      await api.put(`/ventas/${datos.payload.id}`, datos.payload)
+      $q.notify({ type: 'positive', message: 'Venta actualizada' })
     } else {
-      await api.post('/pacas', datos.payload)
-      $q.notify({ type: 'positive', message: 'Paca registrada' })
+      await api.post('/ventas', datos.payload)
+      $q.notify({ type: 'positive', message: 'Venta registrada' })
     }
     dialogo.value = false
-    await cargarPacas()
+    await cargarVentas()
   } catch (err) {
     $q.notify({ type: 'negative', message: `Error al guardar: ${err}` })
   }
@@ -298,17 +259,17 @@ const guardar = async (datos) => {
 
 async function eliminar() {
   try {
-    await api.delete(`/pacas/${pacaSeleccionada.value}`)
+    await api.delete(`/ventas/${ventaSeleccionada.value}`)
     dialogEliminar.value = false
-    $q.notify({ type: 'positive', message: 'Paca eliminada' })
-    await cargarPacas()
+    $q.notify({ type: 'positive', message: 'Venta eliminada' })
+    await cargarVentas()
   } catch (error) {
-    alert('Error eliminando la paca')
+    alert('Error eliminando la venta')
     console.error(error)
   }
 }
 
-onMounted(cargarPacas)
+onMounted(cargarVentas)
 </script>
 <style lang="sass">
 .my-sticky-header-table
