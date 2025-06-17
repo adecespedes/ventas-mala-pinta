@@ -1,7 +1,7 @@
 <template>
   <q-card flat bordered class="q-mt-md">
     <q-card-section class="row items-center">
-      <div class="text-h6">Nomenclador Productos</div>
+      <div class="text-h6">Nomenclador Tipo de paca</div>
       <div class="q-gutter-sm" style="flex-grow: 1"></div>
       <q-btn color="primary" icon="add" label="Adicionar" @click="abrirForm()" />
       <q-btn
@@ -45,18 +45,19 @@
           class="bg-primary text-white text-h6"
           style="position: sticky; top: 0; z-index: 1"
         >
-          <div class="text-h6">{{ editando ? 'Editar Producto' : 'Agregar Producto' }}</div>
+          <div class="text-h6">{{ editando ? 'Editar Tipo de paca' : 'Agregar Tipo de paca' }}</div>
         </q-card-section>
 
-        <q-card-section class="q-gutter-md" style="overflow-y: auto; max-height: 65vh">
+        <q-card-section style="overflow-y: auto; max-height: 65vh">
           <q-input
             v-model="form.nombre"
-            label="Nombre del Producto"
+            label="Nombre del Tipo de paca"
             dense
             outlined
             autofocus
             :rules="[(val) => !!val || 'El nombre es requerido']"
           />
+          <q-checkbox v-model="form.activo" label="¿Tipo de paca mixta?" left-label />
         </q-card-section>
 
         <q-card-actions
@@ -72,7 +73,7 @@
 
     <q-dialog v-model="dialogEliminar">
       <q-card>
-        <q-card-section class="text-h6">¿Eliminar producto?</q-card-section>
+        <q-card-section class="text-h6">¿Eliminar tipo de paca?</q-card-section>
         <q-card-section> Esta acción no se puede deshacer. </q-card-section>
         <q-card-actions align="right">
           <q-btn flat label="Cancelar" color="primary" v-close-popup />
@@ -106,18 +107,27 @@ const editando = ref(false)
 const form = ref({
   id: null,
   nombre: '',
+  activo: true,
 })
 
 const columns = [
   { name: 'id', label: 'ID', field: 'id', align: 'center' },
   { name: 'nombre', label: 'Nombre', field: 'nombre', align: 'center' },
+  {
+    name: 'activo',
+    label: 'Mixta',
+    field: 'activo',
+    align: 'center',
+    sortable: true,
+    format: (val) => (val ? '✅' : '❌'),
+  },
   { name: 'actions', label: '', field: 'actions', align: 'right' },
 ]
 
 const cargarProductos = async () => {
   loading.value = true
   try {
-    const res = await api.get('/productos')
+    const res = await api.get('/tipos')
     productos.value = res.data
   } catch (error) {
     console.error(error)
@@ -133,7 +143,7 @@ function abrirForm(producto = null) {
     form.value = { ...producto }
     editando.value = true
   } else {
-    form.value = { id: null, nombre: '' }
+    form.value = { id: null, nombre: '', activo: true }
     editando.value = false
   }
   dialogOpen.value = true
@@ -149,31 +159,34 @@ async function guardarProducto() {
   }
   try {
     if (editando.value) {
-      await api.patch(`/productos/${form.value.id}`, { nombre: form.value.nombre })
-      $q.notify({ type: 'positive', message: 'Producto editado correctamente' })
+      await api.patch(`/tipos/${form.value.id}`, {
+        nombre: form.value.nombre,
+        activo: form.value.activo,
+      })
+      $q.notify({ type: 'positive', message: 'Tipo de paca editado correctamente' })
     } else {
-      await api.post('/productos', { nombre: form.value.nombre })
-      $q.notify({ type: 'positive', message: 'Producto añadido correctamente' })
+      await api.post('/tipos', { nombre: form.value.nombre, activo: form.value.activo })
+      $q.notify({ type: 'positive', message: 'Tipo de paca añadido correctamente' })
     }
     await cargarProductos()
     cerrarForm()
   } catch (error) {
-    $q.notify({ type: 'negative', message: 'Error guardando el producto' })
+    $q.notify({ type: 'negative', message: 'Error guardando el tipo de paca' })
     console.error(error)
   }
 }
 
 async function eliminarProducto() {
   try {
-    await api.delete(`/productos/${productoSeleccionado.value}`)
+    await api.delete(`/tipos/${productoSeleccionado.value}`)
     dialogEliminar.value = false
-    $q.notify({ type: 'positive', message: 'Producto eliminado' })
+    $q.notify({ type: 'positive', message: 'Tipo de paca eliminado' })
     await cargarProductos()
   } catch (error) {
     if (error.response?.data?.message) {
       $q.notify({ type: 'negative', message: error.response.data.message })
     } else {
-      $q.notify({ type: 'negative', message: 'Error al eliminar el producto' })
+      $q.notify({ type: 'negative', message: 'Error al eliminar el tipo de paca' })
     }
     console.error(error)
   }
@@ -206,3 +219,4 @@ async function eliminarProducto() {
     /* height of all previous header rows */
     scroll-margin-top: 48px
 </style>
+

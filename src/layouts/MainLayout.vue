@@ -1,15 +1,16 @@
 <template>
-  <q-layout view="lHh Lpr lFf">
-    <q-header elevated class="bg-primary text-white">
+  <q-layout view="hHh lpR fFf">
+    <q-header elevated>
       <q-toolbar>
-        <q-btn flat @click="drawer = !drawer" round dense icon="menu" />
-        <q-toolbar-title> Gestión de Ventas </q-toolbar-title>
+        <q-btn flat dense round icon="menu" @click="drawer = !drawer" />
+        <q-toolbar-title>Gestión de Ventas</q-toolbar-title>
       </q-toolbar>
     </q-header>
 
     <q-drawer show-if-above v-model="drawer" side="left" bordered>
       <q-list>
-        <q-item clickable v-ripple to="/" exact>
+        <q-item-label header>Menú</q-item-label>
+        <q-item clickable v-ripple to="/dashboard" exact>
           <q-item-section avatar><q-icon name="dashboard" /></q-item-section>
           <q-item-section>Dashboard</q-item-section>
         </q-item>
@@ -24,10 +25,23 @@
           <q-item-section>Pacas</q-item-section>
         </q-item>
 
-        <q-item clickable v-ripple to="/productos">
-          <q-item-section avatar><q-icon name="category" /></q-item-section>
-          <q-item-section>Productos</q-item-section>
-        </q-item>
+        <q-expansion-item
+          icon="category"
+          label="Nomencladores"
+          group="nomencladores"
+          expand-separator
+          :content-inset-level="1"
+        >
+          <q-item clickable to="/nomencladores/productos" exact>
+            <q-item-section avatar><q-icon name="inventory_2" /></q-item-section>
+            <q-item-section>Productos</q-item-section>
+          </q-item>
+
+          <q-item clickable to="/nomencladores/tipo-paca" exact>
+            <q-item-section avatar><q-icon name="style" /></q-item-section>
+            <q-item-section>Tipo de Paca</q-item-section>
+          </q-item>
+        </q-expansion-item>
       </q-list>
     </q-drawer>
 
