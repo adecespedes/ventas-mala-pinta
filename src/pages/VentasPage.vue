@@ -5,5 +5,5 @@
 </template>
 
 <script setup>
-import VentasTable from 'components/VentasTable.vue'
+import VentasTable from 'src/components/ventas/VentasTable.vue'
 </script>

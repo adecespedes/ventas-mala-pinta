@@ -5,5 +5,5 @@
 </template>
 
 <script setup>
-import ProductosTable from 'components/ProductosTable.vue'
+import ProductosTable from 'src/components/productos/ProductosTable.vue'
 </script>

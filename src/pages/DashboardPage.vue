@@ -69,12 +69,12 @@
 import { ref, onMounted } from 'vue'
 import { api } from 'src/boot/axios'
 
-import VentasTotales from '../components/VentasTotales.vue'
+import VentasTotales from '../components/charts/VentasTotales.vue'
 // import PiezasVendidas from '../components/PiezasVendidas.vue'
-import Ingresos from '../components/Ingresos.vue'
+import Ingresos from '../components/charts/Ingresos.vue'
 // import VentasPorTipo from '../components/VentasPorTipo.vue'
-import ProductosMasVendidos from '../components/ProductosMasVendidos.vue'
-import MesMasVendido from '../components/MesMasVendido.vue'
+import ProductosMasVendidos from '../components/charts/ProductosMasVendidos.vue'
+import MesMasVendido from '../components/charts/MesMasVendido.vue'
 
 const periodo = ref({ label: 'Día', value: 'dia' })
 const periodos = [

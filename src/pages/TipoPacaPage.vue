@@ -3,5 +3,5 @@
 </template>
 
 <script setup>
-import TipoPacaTable from 'components/TipoPacaTable.vue'
+import TipoPacaTable from 'src/components/tipoPaca/TipoPacaTable.vue'
 </script>

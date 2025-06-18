@@ -5,5 +5,5 @@
 </template>
 
 <script setup>
-import PacasTable from 'components/PacasTable.vue'
+import PacasTable from 'src/components/pacas/PacasTable.vue'
 </script>
