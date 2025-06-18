@@ -1,13 +1,13 @@
 <template>
   <q-card class="my-card bg-primary text-white">
     <q-card-section>
-      <div class="text-h6">Ingresos ({{ periodoLabel }})</div>
+      <div class="text-h6 text-center">Ingresos ({{ periodoLabel }})</div>
 
       <div v-if="loading" class="q-mt-md text-center">
         <q-spinner-dots size="40" />
       </div>
 
-      <div v-else class="text-h4 q-mt-md">
+      <div v-else class="text-h4 q-mt-md text-center">
         {{ formatCurrency(ingresos) }}
       </div>
     </q-card-section>

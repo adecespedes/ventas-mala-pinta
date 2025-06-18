@@ -12,16 +12,16 @@
       />
     </div>
 
-    <q-card class="my-card q-pa-md">
+    <q-card class="my-card q-pa-md q-mb-md">
       <div class="text-h6 q-mb-sm">Resumen General</div>
-      <div class="row q-col-gutter-md">
+      <div class="row q-col-gutter-md text-center">
         <q-card-section class="col">
           <div class="text-subtitle1">Ingresos Totales</div>
-          <div class="text-h4 text-positive">$ {{ resumen.ingresos }}</div>
+          <div class="text-h4 text-positive">{{ formatCurrency(resumen.ingresos) }}</div>
         </q-card-section>
         <q-card-section class="col">
           <div class="text-subtitle1">Gastos Totales</div>
-          <div class="text-h4 text-negative">$ {{ resumen.gastos }}</div>
+          <div class="text-h4 text-negative">{{ formatCurrency(resumen.gastos) }}</div>
         </q-card-section>
         <q-card-section class="col">
           <div class="text-subtitle1">Balance</div>
@@ -29,7 +29,7 @@
             class="text-h4"
             :class="resumen.ingresos - resumen.gastos >= 0 ? 'text-positive' : 'text-negative'"
           >
-            $ {{ resumen.balance }}
+            {{ formatCurrency(resumen.balance) }}
           </div>
         </q-card-section>
       </div>
@@ -37,7 +37,7 @@
 
     <!-- RESUMEN RÁPIDO -->
     <q-card flat bordered class="q-pa-md q-mb-md">
-      <div class="text-h6 q-mb-md">📌 Resumen del Periodo</div>
+      <!-- <div class="text-h6 q-mb-md">📌 Resumen del Periodo</div> -->
       <q-row class="q-col-gutter-md">
         <q-col xs="12" sm="6" md="4">
           <Ingresos :periodo="periodo" />
@@ -85,6 +85,13 @@ const periodos = [
 ]
 
 const resumen = ref({ ingresos: 0, gastos: 0 })
+
+const formatCurrency = (value) =>
+  new Intl.NumberFormat('es-CO', {
+    style: 'currency',
+    currency: 'COP',
+    minimumFractionDigits: 0,
+  }).format(value)
 
 onMounted(async () => {
   const res = await api.get('/estadisticas/resumen-financiero')

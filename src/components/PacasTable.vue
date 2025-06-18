@@ -58,15 +58,17 @@
             <q-td key="nombre" :props="props">{{ props.row.nombre }}</q-td>
             <q-td key="tipoId" :props="props">{{ props.row.tipo.nombre }}</q-td>
             <q-td key="cantidad" :props="props">{{ props.row.cantidad }}</q-td>
-            <q-td key="precio" :props="props">{{ props.row.precio }}</q-td>
-            <q-td key="cambio" :props="props">{{ props.row.cambio }}</q-td>
+            <q-td key="precio" :props="props">{{ formatCurrency(props.row.precio) }}</q-td>
+            <q-td key="cambio" :props="props">{{ formatCurrency(props.row.cambio) }}</q-td>
             <q-td key="precioMN" :props="props">
-              {{ `$${(props.row.precio * props.row.cambio).toFixed(2)}` }}
+              {{ `${formatCurrency((props.row.precio * props.row.cambio).toFixed(2))}` }}
             </q-td>
             <q-td key="precioMin" :props="props">
               {{
                 props.row.cantidad
-                  ? `$${Math.floor((props.row.precio * props.row.cambio) / props.row.cantidad)}`
+                  ? `${formatCurrency(
+                      Math.floor((props.row.precio * props.row.cambio) / props.row.cantidad)
+                    )}`
                   : '—'
               }}
             </q-td>
@@ -180,6 +182,13 @@ const confirmarEliminar = (id) => {
   pacaSeleccionada.value = id
   dialogEliminar.value = true
 }
+
+const formatCurrency = (value) =>
+  new Intl.NumberFormat('es-CO', {
+    style: 'currency',
+    currency: 'COP',
+    minimumFractionDigits: 0,
+  }).format(value)
 
 const columns = [
   { name: 'expander', label: '', field: 'expander' },

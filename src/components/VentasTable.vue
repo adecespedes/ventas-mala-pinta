@@ -59,7 +59,9 @@
               dayjs(props.row.fecha).format('DD-MM-YYYY')
             }}</q-td>
             <q-td key="totalPiezas" :props="props">{{ props.row.totalPiezas }}</q-td>
-            <q-td key="totalPrecio" :props="props">${{ props.row.totalPrecio }}</q-td>
+            <q-td key="totalPrecio" :props="props">{{
+              formatCurrency(props.row.totalPrecio)
+            }}</q-td>
 
             <q-td key="acciones" :props="props" align="right">
               <q-btn flat icon="edit" color="primary" @click="abrirDialogo(props.row)">
@@ -162,6 +164,13 @@ const confirmarEliminar = (id) => {
   ventaSeleccionada.value = id
   dialogEliminar.value = true
 }
+
+const formatCurrency = (value) =>
+  new Intl.NumberFormat('es-CO', {
+    style: 'currency',
+    currency: 'COP',
+    minimumFractionDigits: 0,
+  }).format(value)
 
 const columns = [
   { name: 'expander', label: '', field: 'expander' },
