@@ -27,7 +27,6 @@ const loading = ref(false)
 const ingresos = ref(0)
 
 const periodoLabel = computed(() => {
-  debugger
   switch (props.periodo.value) {
     case 'semana':
       return 'última semana'
