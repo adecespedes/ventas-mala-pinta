@@ -1,22 +1,24 @@
-# Etapa de build
+# Etapa 1: Build
 FROM node:20.16-alpine AS build
+
+# Aceptamos la variable para VITE_API_URL
+ARG VITE_API_URL
+ENV VITE_API_URL=$VITE_API_URL
 
 WORKDIR /app
 
-# Copiamos todo el proyecto antes de instalar
+# Copiamos archivos necesarios
+COPY package*.json ./
 COPY . .
 
-# Instalamos dependencias (aquí ya está quasar.config.js y src/)
-RUN npm install
+# Instalamos dependencias y compilamos
+RUN npm install && npm run build
 
-# Ejecutamos el build de Quasar
-RUN npm run build
-
-# Etapa de producción con Nginx
+# Etapa 2: Servidor NGINX para servir el frontend
 FROM nginx:alpine
 
-# Copiamos la build al contenedor Nginx
-COPY --from=build /app/dist/spa /usr/share/nginx/html
+# Copiamos archivos compilados al contenedor NGINX
+COPY --from=build /app/dist /usr/share/nginx/html
 
-# Si tienes una config personalizada para nginx
+# Configuración personalizada de NGINX (si tienes una)
 COPY nginx.conf /etc/nginx/conf.d/default.conf
