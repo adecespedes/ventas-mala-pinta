@@ -5,7 +5,7 @@
       <div v-if="loading" class="q-pa-md text-center">
         <q-spinner-dots size="40" />
       </div>
-      <div style="height: 320px" v-else-if="chartData">
+      <div style="height: 300px" v-else-if="chartData">
         <Bar :data="chartData" :options="chartOptions" />
       </div>
 
@@ -80,13 +80,20 @@ const chartOptions = {
         label: (tooltipItem) => {
           return [
             `Total: ${tooltipItem.parsed.y}`,
-            `Piezas: ${tooltipItem.chart.data.datasets[1].data[tooltipItem.dataIndex]}`,
+            // `Piezas: ${tooltipItem.chart.data.datasets[1].data[tooltipItem.dataIndex]}`,
           ]
         },
       },
     },
   },
 }
+
+// const formatCurrency = (value) =>
+//   new Intl.NumberFormat('es-CO', {
+//     style: 'currency',
+//     currency: 'COP',
+//     minimumFractionDigits: 0,
+//   }).format(value)
 
 const generarLabels = (data, tipoPeriodo) => {
   switch (tipoPeriodo) {
@@ -146,6 +153,6 @@ watch(() => props.periodo, fetchData)
 <style scoped>
 .my-card {
   margin-bottom: 20px;
-  height: 450px;
+  height: 470px;
 }
 </style>

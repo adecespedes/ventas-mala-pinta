@@ -40,14 +40,15 @@
       <!-- <div class="text-h6 q-mb-md">📌 Resumen del Periodo</div> -->
       <q-row class="q-col-gutter-md">
         <q-col xs="12" sm="6" md="4">
+          <ResumenPiezas :periodo="periodo" />
+        </q-col>
+        <q-col xs="12" sm="6" md="4">
           <Ingresos :periodo="periodo" />
         </q-col>
+
         <q-col xs="12" sm="6" md="4">
           <VentasTotales :periodo="periodo" />
         </q-col>
-        <!-- <q-col xs="12" sm="6" md="4">
-          <PiezasVendidas :periodo="periodo" />
-        </q-col> -->
       </q-row>
     </q-card>
 
@@ -75,6 +76,7 @@ import Ingresos from '../components/charts/Ingresos.vue'
 // import VentasPorTipo from '../components/VentasPorTipo.vue'
 import ProductosMasVendidos from '../components/charts/ProductosMasVendidos.vue'
 import MesMasVendido from '../components/charts/MesMasVendido.vue'
+import ResumenPiezas from '../components/charts/ResumenPiezas.vue'
 
 const periodo = ref({ label: 'Día', value: 'dia' })
 const periodos = [
