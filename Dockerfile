@@ -18,7 +18,7 @@ RUN npm install && npm run build
 FROM nginx:alpine
 
 # Copiamos archivos compilados al contenedor NGINX
-COPY --from=build /app/dist /usr/share/nginx/html
+COPY --from=build /app/dist/spa /usr/share/nginx/html
 
 # Configuración personalizada de NGINX (si tienes una)
 COPY nginx.conf /etc/nginx/conf.d/default.conf
