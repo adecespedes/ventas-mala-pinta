@@ -10,7 +10,9 @@
       </div>
       <div class="text-right">
         <div class="text-h5 text-weight-bold">🧺 {{ mesMasVendido?.totalPiezas }} piezas</div>
-        <div class="text-h5 text-weight-bold">💵 ${{ mesMasVendido?.totalPrecio }}</div>
+        <div class="text-h5 text-weight-bold">
+          💵 {{ formatCurrency(mesMasVendido?.totalPrecio) }}
+        </div>
       </div>
     </q-card-section>
 
@@ -39,6 +41,13 @@ const fetchMesMasVendido = async () => {
     loading.value = false
   }
 }
+
+const formatCurrency = (value) =>
+  new Intl.NumberFormat('es-CO', {
+    style: 'currency',
+    currency: 'COP',
+    minimumFractionDigits: 0,
+  }).format(value)
 
 onMounted(fetchMesMasVendido)
 

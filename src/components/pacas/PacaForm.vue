@@ -192,8 +192,10 @@ const verificarTipoActivo = (idSeleccionado) => {
 watch(
   detallesProducto,
   (nuevosDetalles) => {
-    const total = nuevosDetalles.reduce((acc, detalle) => acc + (detalle.total || 0), 0)
-    localForm.value.cantidad = total
+    if (nuevosDetalles.length !== 0) {
+      const total = nuevosDetalles.reduce((acc, detalle) => acc + (detalle.total || 0), 0)
+      localForm.value.cantidad = total
+    }
   },
   { deep: true }
 )
